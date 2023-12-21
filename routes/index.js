@@ -1,29 +1,40 @@
 const express = require('express');
 const router = express.Router();
 const userModel = require('./users');
+const postModel = require('./posts');
 const localStrategy = require('passport-local');
 const passport = require('passport');
-passport.use(new localStrategy(userModel.authenticate()));
+const upload = require('./multer');
+
+// ------------------HomePage ------------------
 
 router.get('/',function(req,res){
   res.render('index')
 })
 
-router.get('/feed', isLoggedIn,async function(req,res){
+// ------------------ pages --------------------
+
+router.get('/feed',async function(req,res){
   res.render('feed')
 } )
 
 router.get('/profile', isLoggedIn,async function(req, res){
-  res.render('profile')
+  const user = await userModel.findOne({username:req.session.passport.user}).populate('posts');
+  // console.log(user);
+  res.render('profile',{user:user});
 })
 
-router.get('/login',async function(req,res){
-  res.render('login')
+router.get('/login',function(req,res){
+  res.render('login', {error: req.flash('error')});
 })
 
 router.get('/signup', function(req, res) {
   res.render('register', { title: 'Express' });
 });
+
+// -------------- auth routes backend -----------
+passport.use(new localStrategy(userModel.authenticate()));
+
 
 router.post('/register',async function(req,res){
   const { username, fullname, email } = req.body;
@@ -39,7 +50,8 @@ router.post('/register',async function(req,res){
 
 router.post('/login', passport.authenticate('local',{
   successRedirect : '/feed',
-  failureRedirect : '/'
+  failureRedirect : '/login',
+  failureFlash : true,
 }), function(req,res){
 
 })
@@ -57,5 +69,27 @@ function isLoggedIn(req, res, next){
   }
   res.redirect('/');
 }
+
+// ------------------ upload route ---------------
+
+router.post('/upload', isLoggedIn,upload.single('file'), async function(req,res){
+  if(!req.file){
+    return res.status(400).send('No files were uploaded.');
+  }
+
+  // res.send('File uploaded successfully!');
+  const user = await userModel.findOne({username: req.session.passport.user});
+  const createdPost = await postModel.create({
+    image : req.file.filename,
+    postText : req.body.postname,
+    user : user._id
+
+  });
+  user.posts.push(createdPost._id);
+  await user.save();
+  res.redirect("/profile");
+});
+
+// -----------------------------------------------
 
 module.exports = router;
