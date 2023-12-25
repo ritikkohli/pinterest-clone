@@ -17,7 +17,8 @@ const userSchema = new Schema({
     unique: true,
   },
   dp: {
-    type: String, // Assuming dp is a URL to the profile picture
+    type: String,
+    default: 'userdp.png' // Assuming dp is a URL to the profile picture
   },
   fullname: {
     type: String,

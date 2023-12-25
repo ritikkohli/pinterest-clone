@@ -1,3 +1,4 @@
+<%- include ./header.ejs -%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,39 +6,49 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <link rel="stylesheet" href="/stylesheets/profile.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.0.0/fonts/remixicon.css" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/stylesheets/style.css">
 </head>
 <body>
-    <div class="container">
-        <div class="profile-card">
-          <div class="profile-picture">
-            <img src="https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?q=80&w=1530&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Profile Picture">
-          </div>
-          <h2 class="name"><%=user.fullname%></h2>
-          <h3 class="username">@<%=user.username%></h3>
-          <p class="tagline">Lorem ipsum dolor</p>
-          <p class="description">Lorem ipsum dolor sit amet consectetur adipisicing elit.</p>
-          <a href="/logout" class="button logout-btn">Logout</a>
-          <form method="post" action="/upload" enctype="multipart/form-data">
-            <input type="text" name="postname" placeholder="some caption"/>
-            <input type="file" name="file"/>
-            <input type="submit"/>
-          </form>
-        </div>
-    </div>
-    <div class="container">
-      <div class="cards flex">
-      <% user.posts.forEach(function(post){ %>
-        <div class="card" style="width: 18rem;">
-          <img src="/images/uploads/<%=post.image %>" class="card-img-top"/>
-          <div class="card-body">
-            <h5 class="card-title"><%=post.postText %></h5>
-          </div>
-        </div>
-      <% }) %>
+    <div>
+    <form id="formupload" hidden method="post" action="/dpupload" enctype="multipart/form-data">
+      <input type="file" name="dp"/>
+    </form>
+    <div class="flex flex-col gap-2 items-center my-5 py-3 bg-red-200 w-full">
+      <div class="relative w-32 h-32 rounded-full overflow-hidden">
+        <img src="/images/uploads/<%=user.dp%>" class="object-cover object-center h-full w-full" alt="Profile Picture"/>
+        <i class="w-6 h-6 flex justify-center items-center absolute bottom-0 right-0 rounded-full m-4 bg-gray-800 ri-pencil-fill text-white edit-icon"></i>
+      </div>
+      <h2 class="text-4xl font-semibold"><%=user.fullname%></h2>
+      <h3 class="text-sm text-gray-600"><i class=" ri-pinterest-fill text-xl mr-1"></i><%=user.username%></h3>
+      <div class="flex">
+        <a class="font-semibold">0 followers</a>
+        <p class="text-xs mx-1">.</p>
+        <a class="font-semibold">0 following</a>
+      </div>    
+      <div class="flex mt-1">
+        <a class="bg-gray-200 p-3 rounded-full font-semibold text-base mr-2">Share</a>
+        <a class="bg-gray-200 p-3 rounded-full font-semibold text-base">Edit profile</a>
+      </div>  
+      <form method="post" action="/upload" enctype="multipart/form-data">
+        <input type="text" name="postname" placeholder="some caption"/>
+        <input type="file" name="file"/>
+        <input type="submit"/>
+      </form>
       </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+    <div class="bg-red-500 w-full box-border px-14 py-5">
+      <a id="mypins-link" href="/mypins" hidden></a>
+      <div id="pin-box" class="bg-white w-56 h-52 rounded-xl cursor-pointer">
+        <div class="bg-black w-full h-36 rounded-xl mb-2 overflow-hidden">
+          <img src="/images/uploads/<%= user.posts.length > 0 ? user.posts[0].image : 'userdp.png' %>" class="object-cover object-center w-full h-full"/>
+        </div>
+        <a class="m-5 text-xl font-semibold">All Pins</a>
+        <p class="text-sm mx-5"><%=user.posts.length%> Pins</p>
+      </div>
+    </div>
+    <script src="/javascripts/profile.js"></script>    
 </body>
 </html>

@@ -9,19 +9,25 @@ const upload = require('./multer');
 // ------------------HomePage ------------------
 
 router.get('/',function(req,res){
-  res.render('index')
+  res.render('login',{nav:false,error: req.flash('error')})
 })
 
 // ------------------ pages --------------------
 
 router.get('/feed',async function(req,res){
-  res.render('feed')
+  const posts = await postModel.find().populate('user');
+  res.render('feed',{nav:true,posts})
 } )
+
+router.get('/mypins', isLoggedIn,async function(req,res){
+  const user = await userModel.findOne({username:req.session.passport.user}).populate('posts');
+  res.render('allpins',{user});
+})
 
 router.get('/profile', isLoggedIn,async function(req, res){
   const user = await userModel.findOne({username:req.session.passport.user}).populate('posts');
   // console.log(user);
-  res.render('profile',{user:user});
+  res.render('profile',{nav:true,user:user});
 })
 
 router.get('/login',function(req,res){
@@ -29,9 +35,8 @@ router.get('/login',function(req,res){
 })
 
 router.get('/signup', function(req, res) {
-  res.render('register', { title: 'Express' });
+  res.render('register', { title: 'Express',nav:false});
 });
-
 // -------------- auth routes backend -----------
 passport.use(new localStrategy(userModel.authenticate()));
 
@@ -90,6 +95,17 @@ router.post('/upload', isLoggedIn,upload.single('file'), async function(req,res)
   res.redirect("/profile");
 });
 
+router.post('/dpupload', isLoggedIn,upload.single('dp'), async function(req,res){
+  if(!req.file){
+    return res.status(400).send('No files were uploaded.');
+  }
+
+  // res.send('File uploaded successfully!');
+  const user = await userModel.findOne({username: req.session.passport.user});
+  user.dp = req.file.filename;
+  await user.save();
+  res.redirect("/profile");
+});
 // -----------------------------------------------
 
 module.exports = router;
